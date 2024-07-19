@@ -100,7 +100,7 @@
       ⚡<a href="https://github.com/zeus6768">제우스</a>
     </td>
     <td align="center">
-      🤩<a href="https://github.com/HoeSeong123">초롱</a>
+      🤩<a href="https://github.com/HoeSeong123/code-zap-branch-practice/blob/docs/chorong/Chorong.md">초롱</a>
     </td>
     <td align="center">
       🍀<a href="https://github.com/jminkkk">몰리</a>
