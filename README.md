@@ -48,10 +48,10 @@
   <tr>
   <tr>
     <td align="center">
-      🍓<a href="https://github.com/Hain-tain">헤인</a>
+      🍓<a href="https://github.com/Hain-tain/code-zap-branch-practice/blob/docs/hain/hain.md">헤인</a>
     </td>
     <td align="center">
-      🌜<a href="https://github.com/vi-wolhwa">월하</a>
+      🌜<a href="https://github.com/vi-wolhwa/code-zap-branch-practice/blob/docs/vi-wolhwa/wolhwa.md">월하</a>
     </td>
     <td align="center">
       🔪<a href="https://github.com/Jaymyong66/code-zap-branch-practice/blob/docs/mawi/mawi.md">마스터위</a>
@@ -95,19 +95,19 @@
   <tr>
   <tr>
     <td align="center">
-      🐰<a href="https://github.com/kyum-q">켬미</a>
+      🐰<a href="https://github.com/kyum-q/code-zap-branch-practice/blob/feat/readme_kyummi/kyummi.md">켬미</a>
     </td>
     <td align="center">
-      ⚡<a href="https://github.com/zeus6768">제우스</a>
+      ⚡<a href="https://github.com/zeus6768/code-zap-branch-practice/blob/docs/zeus/zeus.md">제우스</a>
     </td>
     <td align="center">
-      🤩<a href="https://github.com/HoeSeong123">초롱</a>
+      🤩<a href="https://github.com/HoeSeong123/code-zap-branch-practice/blob/docs/chorong/Chorong.md">초롱</a>
     </td>
     <td align="center">
       🍀<a href="https://github.com/jminkkk/code-zap-branch-practice/blob/docs/moly/Moly.md">몰리</a>
     </td>
     <td align="center">
-      👍<a href="https://github.com/zangsu">짱수</a>
+      👍<a href="https://github.com/zangsu/code-zap-branch-practice/blob/docs/zangsu/zangsu.md">짱수</a>
     </td>
   </tr>
 </table>
