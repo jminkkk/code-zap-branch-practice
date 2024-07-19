@@ -103,7 +103,7 @@
       🤩<a href="https://github.com/HoeSeong123">초롱</a>
     </td>
     <td align="center">
-      🍀<a href="https://github.com/jminkkk">몰리</a>
+      🍀<a href="https://github.com/jminkkk/code-zap-branch-practice/blob/docs/moly/Moly.md">몰리</a>
     </td>
     <td align="center">
       👍<a href="https://github.com/zangsu">짱수</a>
