@@ -22,6 +22,7 @@
 <br>
 
 ## 팀원 🐣
+
 <table align="center">
   <tr>
     <td align="center">Frontend</td>
@@ -47,7 +48,7 @@
   <tr>
   <tr>
     <td align="center">
-      🍓<a href="https://github.com/Hain-tain">헤인</a>
+      🍓<a href="https://github.com/Hain-tain/code-zap-branch-practice/blob/docs/hain/hain.md">헤인</a>
     </td>
     <td align="center">
       🌜<a href="https://github.com/vi-wolhwa">월하</a>
