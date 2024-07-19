@@ -94,7 +94,7 @@
   <tr>
   <tr>
     <td align="center">
-      🐰<a href="https://github.com/kyum-q">켬미</a>
+      🐰<a href="https://github.com/kyum-q/code-zap-branch-practice/blob/feat/readme_kyummi/kyummi.md">켬미</a>
     </td>
     <td align="center">
       ⚡<a href="https://github.com/zeus6768">제우스</a>
@@ -112,4 +112,3 @@
 </table>
 
 <br>
-
