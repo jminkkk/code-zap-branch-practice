@@ -22,6 +22,7 @@
 <br>
 
 ## 팀원 🐣
+
 <table align="center">
   <tr>
     <td align="center">Frontend</td>
@@ -53,7 +54,7 @@
       🌜<a href="https://github.com/vi-wolhwa">월하</a>
     </td>
     <td align="center">
-      🔪<a href="https://github.com/Jaymyong66">마스터위</a>
+      🔪<a href="https://github.com/Jaymyong66/code-zap-branch-practice/blob/docs/mawi/mawi.md">마스터위</a>
     </td>
   </tr>
 </table>
@@ -112,4 +113,3 @@
 </table>
 
 <br>
-
