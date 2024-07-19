@@ -104,7 +104,7 @@
       🤩<a href="https://github.com/HoeSeong123/code-zap-branch-practice/blob/docs/chorong/Chorong.md">초롱</a>
     </td>
     <td align="center">
-      🍀<a href="https://github.com/jminkkk">몰리</a>
+      🍀<a href="https://github.com/jminkkk/code-zap-branch-practice/blob/docs/moly/Moly.md">몰리</a>
     </td>
     <td align="center">
       👍<a href="https://github.com/zangsu/code-zap-branch-practice/blob/docs/zangsu/zangsu.md">짱수</a>
