@@ -107,7 +107,7 @@
       🍀<a href="https://github.com/jminkkk">몰리</a>
     </td>
     <td align="center">
-      👍<a href="https://github.com/zangsu">짱수</a>
+      👍<a href="https://github.com/zangsu/code-zap-branch-practice/blob/docs/zangsu/zangsu.md">짱수</a>
     </td>
   </tr>
 </table>
