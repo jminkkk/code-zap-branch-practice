@@ -54,7 +54,7 @@
       🌜<a href="https://github.com/vi-wolhwa/code-zap-branch-practice/blob/docs/vi-wolhwa/wolhwa.md">월하</a>
     </td>
     <td align="center">
-      🔪<a href="https://github.com/Jaymyong66">마스터위</a>
+      🔪<a href="https://github.com/Jaymyong66/code-zap-branch-practice/blob/docs/mawi/mawi.md">마스터위</a>
     </td>
   </tr>
 </table>
