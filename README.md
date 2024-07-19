@@ -97,7 +97,7 @@
       🐰<a href="https://github.com/kyum-q">켬미</a>
     </td>
     <td align="center">
-      ⚡[제우스](zeus.md)
+      ⚡<a href="https://github.com/zeus6768/code-zap-branch-practice/blob/docs/zeus/zeus.md">제우스</a>
     </td>
     <td align="center">
       🤩<a href="https://github.com/HoeSeong123">초롱</a>
