@@ -23,93 +23,11 @@
 
 ## 팀원 🐣
 
-<table align="center">
-  <tr>
-    <td align="center">Frontend</td>
-    <td align="center">Frontend</td>
-    <td align="center">Frontend</td>
-  </tr>
-  <tr>
-    <td>
-      <a href="https://github.com/Hain-tain">
-        <img src="https://avatars.githubusercontent.com/u/157036488?v=4" width="150" style="max-width: 100%;">
-      </a>
-    </td>
-    <td>
-      <a href="https://github.com/vi-wolhwa">
-        <img src="https://avatars.githubusercontent.com/u/52562061?v=4" width="150" style="max-width: 100%;">
-      </a>
-    </td>
-    <td>
-      <a href="https://github.com/Jaymyong66">
-        <img src="https://avatars.githubusercontent.com/u/78201530?v=4" width="150" style="max-width: 100%;">
-      </a>
-    </td>
-  <tr>
-  <tr>
-    <td align="center">
-      🍓<a href="https://github.com/Hain-tain/code-zap-branch-practice/blob/docs/hain/hain.md">헤인</a>
-    </td>
-    <td align="center">
-      🌜<a href="https://github.com/vi-wolhwa/code-zap-branch-practice/blob/docs/vi-wolhwa/wolhwa.md">월하</a>
-    </td>
-    <td align="center">
-      🔪<a href="https://github.com/Jaymyong66/code-zap-branch-practice/blob/docs/mawi/mawi.md">마스터위</a>
-    </td>
-  </tr>
-</table>
-<table align="center">
-  <tr>
-    <td align="center">Backend</td>
-    <td align="center">Backend</td>
-    <td align="center">Backend</td>
-    <td align="center">Backend</td>
-    <td align="center">Backend</td>
-  </tr>
-  <tr>
-    <td>
-      <a href="https://github.com/kyum-q">
-        <img src="https://avatars.githubusercontent.com/u/109158497?v=4" width="150" style="max-width: 100%;">
-      </a>
-    </td>
-    <td>
-      <a href="https://github.com/zeus6768">
-        <img src="https://avatars.githubusercontent.com/u/81848498?v=4" width="150" style="max-width: 100%;">
-      </a>
-    </td>
-    <td>
-      <a href="https://github.com/HoeSeong123">
-        <img src="https://avatars.githubusercontent.com/u/125939503?v=4" width="150" style="max-width: 100%;">
-      </a>
-    </td>
-    <td>
-      <a href="https://github.com/jminkkk">
-        <img src="https://avatars.githubusercontent.com/u/102847513?v=4" width="150" style="max-width: 100%;">
-      </a>
-    </td>
-    <td>
-      <a href="https://github.com/zangsu">
-        <img src="https://avatars.githubusercontent.com/u/76612738?v=4" width="150" style="max-width: 100%;">
-      </a>
-    </td>
-  <tr>
-  <tr>
-    <td align="center">
-      🐰<a href="https://github.com/kyum-q/code-zap-branch-practice/blob/feat/readme_kyummi/kyummi.md">켬미</a>
-    </td>
-    <td align="center">
-      ⚡<a href="https://github.com/zeus6768/code-zap-branch-practice/blob/docs/zeus/zeus.md">제우스</a>
-    </td>
-    <td align="center">
-      🤩<a href="https://github.com/HoeSeong123/code-zap-branch-practice/blob/docs/chorong/Chorong.md">초롱</a>
-    </td>
-    <td align="center">
-      🍀<a href="https://github.com/jminkkk/code-zap-branch-practice/blob/docs/moly/Moly.md">몰리</a>
-    </td>
-    <td align="center">
-      👍<a href="https://github.com/zangsu/code-zap-branch-practice/blob/docs/zangsu/zangsu.md">짱수</a>
-    </td>
-  </tr>
-</table>
-
-<br>
+- [🍓헤인](hain.md)
+- [🌜월하](wolha.md)
+- [🔪마스터위](mawi.md)
+- [🐰켬미](kyummi.md)
+- [⚡제우스](zeus.md)
+- [🤩초롱](chorong.md)
+- [🍀몰리](moly.md)
+- [👍짱수](zangsu.md)
