@@ -37,14 +37,14 @@ jobs:
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": "🔥 ${{ github.event.pull_request.title}}에 대한 <${{ github.event.pull_request.html_url  }}|pull request>가 생성 되었습니다. 🔥"
+                    "text": "🔥 ${{ github.event.pull_request.title }}에 대한 <${{ github.event.pull_request.html_url }}| pull request>가 생성 되었습니다. 🔥"
                   }
                 },
                 {
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": "PR 브랜치는 `${{ github.event.pull_request.head.ref }}`에서 `${{ github.event.pull_request.base.ref }}` 🚨 입니다.\n @${{ steps.get-reviewers.outputs.github_reviewers }}의 리뷰를 기다리고 있어요! 달려오실거죠?\n"
+                    "text": "${{ steps.get-reviewers.outputs.github_reviewers }}의 리뷰를 기다리고 있어요!"
                   }
                 }
               ]
