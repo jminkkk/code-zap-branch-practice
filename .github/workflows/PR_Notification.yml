@@ -1,4 +1,5 @@
 name: PR Notification to Slack
+
 on:
   pull_request:
     types: [opened]
@@ -14,22 +15,34 @@ jobs:
     - name: Send notification to Slack
       env:
         SLACK_WEBHOOK_URL: ${{ secrets.SLACK_PR_CREATE_WEBHOOK_URL }}
-        SLACK_IDS_JSON: ${{ secrets.SLACK_IDS }}
+        SLACK_IDS_STRING: ${{ secrets.SLACK_IDS }}
       run: |
         PR_TITLE="${{ github.event.pull_request.title }}"
         PR_URL="${{ github.event.pull_request.html_url }}"
-        REVIEWERS=$(echo "${{ github.event.pull_request.requested_reviewers }}" | jq -r '.[].login')
+        REVIEWERS=$(echo '${{ toJson(github.event.pull_request.requested_reviewers) }}' | jq -r '.[].login')
 
-        SLACK_IDS_MAPPING=$(echo "$SLACK_IDS_JSON" | jq -r 'to_entries | map({(.key): .value}) | add')
-        
-        reviewers_string=""
-        for reviewer in $(echo "$REVIEWERS" | jq -r '.[]'); do
-          SLACK_ID=$(echo "$SLACK_IDS_MAPPING" | jq -r --arg key "$reviewer" '.[$key]')
-          if [[ -n "$SLACK_ID" ]]; then
-            reviewers_string+="<@$SLACK_ID> "
+        declare -A SLACK_IDS_MAPPING
+        IFS=',' read -r -a PAIRS <<< "$SLACK_IDS_STRING"
+        for PAIR in "${PAIRS[@]}"; do
+          KEY=$(echo "$PAIR" | cut -d':' -f1 | xargs)
+          VALUE=$(echo "$PAIR" | cut -d':' -f2 | xargs)
+          SLACK_IDS_MAPPING["$KEY"]="$VALUE"
+        done
+
+        SLACK_IDS=""
+        for reviewer in $REVIEWERS; do
+          # Get the corresponding Slack ID from the mapping
+          SLACK_ID="${SLACK_IDS_MAPPING[$(echo "$reviewer" | tr '[:upper:]' '[:lower:]')]}"
+          
+          if [ -n "$SLACK_ID" ]; then
+            SLACK_IDS="${SLACK_IDS}, <@${SLACK_ID}>"
+          else
+            SLACK_IDS="${SLACK_IDS}, @unknown"
           fi
         done
         
+        SLACK_IDS=${SLACK_IDS:2}
+
         curl -X POST -H 'Content-type: application/json' --data '{
-          "text": "🔥 '"${PR_TITLE}"'( <'"${PR_URL}"'> ) 에 대한 pull request가 생성되었습니다.\n'"${reviewers_string}"'의 리뷰를 기다리고 있어요!"
+          "text": "🔥 '"${PR_TITLE}"'( <'"${PR_URL}"'> ) 에 대한 pull request가 생성되었습니다.\n'"${SLACK_IDS}"'의 리뷰를 기다리고 있어요!"
         }' $SLACK_WEBHOOK_URL
