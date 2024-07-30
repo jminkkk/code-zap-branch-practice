@@ -12,22 +12,15 @@ jobs:
       - name: Get reviewers
         id: get-reviewers
         run: |
-          MAPPING=$(cat .github/slack-users.json)
-          PR_NUMBER=${{ github.event.pull_request.number }}
-          PR_REVIEWERS=$(gh pr view $PR_NUMBER --json reviewRequests -q '.reviewRequests[].login')
-          SLACK_MENTIONS=""
+          reviewer_map=$(echo '${{ secrets.SLACK_IDS }}' | jq -r 'to_entries | map("\(.key)=\(.value)") | .[]')
 
-          for reviewer in $PR_REVIEWERS; do
-            SLACK_ID=$(echo "$MAPPING" | jq -r ".[\"$reviewer\"]")
-            if [ "$SLACK_ID" != "null" ]; then
-              SLACK_MENTIONS="<@${SLACK_ID}> "
-              echo @${SLACK_ID}
+          reviewers=""
+          for reviewer in $(gh pr view ${{ github.event.pull_request.number }} --json reviews --jq '.reviews[].author.login'); do
+            if [[ -n "${!reviewer}" ]]; then
+              reviewers+="<@${reviewer_map[$reviewer]}>,"
             fi
           done
-
-          echo "reviewers=${SLACK_MENTIONS}" >> $GITHUB_OUTPUT
-        env:
-          GH_TOKEN: ${{ secrets.GIT_HUB_TOKEN }}
+          echo "::set-output name=reviewers::${reviewers%,}"
 
       - name: Slack Notification
         uses: 8398a7/action-slack@v3
