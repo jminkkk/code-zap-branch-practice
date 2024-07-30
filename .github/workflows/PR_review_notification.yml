@@ -1,25 +1,68 @@
-name: PR Review Notifications
+name: PR Review Notification
 
 on:
   pull_request_review:
     types: [submitted]
 
 jobs:
-  notify_slack:
+  notify-assignee:
     runs-on: ubuntu-latest
     steps:
-      - name: Slack Notification
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Get assignees and map to Slack IDs
+        id: get-assignees
+        run: |
+          MAPPING=$(cat .github/slack-users.json)
+          PR_ASSIGNEES=$(gh pr view ${{ github.event.pull_request.number }} --json assignees -q '.assignees[].login')
+          SLACK_MENTIONS=""
+          for assignee in $PR_ASSIGNEES; do
+            SLACK_ID=$(echo $MAPPING | jq -r ".[\"$assignee\"]")
+            if [ "$SLACK_ID" != "null" ]; then
+              SLACK_MENTIONS="$SLACK_MENTIONS<@$SLACK_ID>,"
+            fi
+          done
+          SLACK_MENTIONS=${SLACK_MENTIONS%,}
+          echo "assignees=$SLACK_MENTIONS" >> $GITHUB_OUTPUT
+        env:
+          GH_TOKEN: ${{ secrets.GIT_HUB_TOKEN }}
+
+      - name: Send Slack notification
         uses: 8398a7/action-slack@v3
         with:
           status: custom
           custom_payload: |
             {
+              "text": "📬 PR #${{ github.event.pull_request.number }}에 새로운 리뷰가 등록되었습니다 📬\n\n${{ steps.get-assignees.outputs.assignees }}",
               "attachments": [{
-                "title": "📬 PR #${{ github.event.pull_request.name }}에 새로운 리뷰가 등록되었습니다 📬",
-                "title_link": "${{ github.event.pull_request.html_url }}",
-                "text": "*리뷰어:* ${{ github.event.review.user.login }}\n*상태:* ${{ github.event.review.state }}",
+                "color": "good",
+                "author_name": "${{ github.event.review.user.login }}",
+                "author_icon": "${{ github.event.review.user.avatar_url }}",
+                "fields": [
+                  {
+                    "title": "PR 제목",
+                    "value": "${{ github.event.pull_request.title }}",
+                    "short": false
+                  },
+                  {
+                    "title": "리뷰어",
+                    "value": "${{ github.event.review.user.login }}",
+                    "short": true
+                  },
+                  {
+                    "title": "리뷰 상태",
+                    "value": "${{ github.event.review.state }}",
+                    "short": true
+                  },
+                  {
+                    "title": "PR URL",
+                    "value": "${{ github.event.pull_request.html_url }}",
+                    "short": false
+                  }
+                ]
               }]
             }
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          GITHUB_TOKEN: ${{ secrets.GIT_HUB_TOKEN }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_PR_REVIEW_WEBHOOK_URL }}
