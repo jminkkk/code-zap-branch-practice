@@ -11,6 +11,8 @@ jobs:
 
       - name: Get reviewers
         id: get-reviewers
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
         run: |
           reviewer_map=$(echo '${{ secrets.SLACK_IDS }}' | jq -r 'to_entries | map("\(.key)=\(.value)") | .[]')
 
@@ -21,6 +23,7 @@ jobs:
             fi
           done
           echo "::set-output name=reviewers::${reviewers%,}"
+          echo "!!Reviewers: ${reviewers}"
 
       - name: Slack Notification
         uses: 8398a7/action-slack@v3
