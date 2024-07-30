@@ -8,11 +8,24 @@ jobs:
   slack-notification:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
+
       - name: Get reviewers
         id: get-reviewers
         run: |
-          REVIEWERS="${{ secrets.REVIEWERS_SLACK_MENTIONS }}"
-          echo "reviewers=$REVIEWERS" >> $GITHUB_OUTPUT
+          MAPPING=$(cat .github/slack-users.json)
+          PR_REVIEWERS=$(gh pr view ${{ github.event.pull_request.number }} --json reviewers -q '.reviewers[].login')
+          SLACK_MENTIONS=""
+          for reviewer in $PR_REVIEWERS; do
+            SLACK_ID=$(echo $MAPPING | jq -r ".[\"$reviewer\"]")
+            if [ "$SLACK_ID" != "null" ]; then
+              SLACK_MENTIONS="$SLACK_MENTIONS<@$SLACK_ID>,"
+            fi
+          done
+          SLACK_MENTIONS=${SLACK_MENTIONS%,}
+          echo "reviewers=$SLACK_MENTIONS" >> $GITHUB_OUTPUT
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Slack Notification
         uses: 8398a7/action-slack@v3
@@ -36,5 +49,5 @@ jobs:
               }]
             }
         env:
-          GITHUB_TOKEN: ${{ secrets.GIT_HUB_TOKEN }}
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_PR_CREATE_WEBHOOK_URL }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
