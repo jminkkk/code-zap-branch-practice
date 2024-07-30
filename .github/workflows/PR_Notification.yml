@@ -1,39 +1,53 @@
 name: PR Slack Notification
-
 on:
   pull_request:
     types: [opened]
-
 jobs:
   slack-notification:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-
       - name: Get reviewers
         id: get-reviewers
         run: |
           MAPPING=$(cat .github/slack-users.json)
           PR_REVIEWERS=$(gh pr view ${{ github.event.pull_request.number }} --json reviewRequests -q '.reviewRequests[].login')
           SLACK_MENTIONS=""
+          GITHUB_MENTIONS=""
           for reviewer in $PR_REVIEWERS; do
             SLACK_ID=$(echo $MAPPING | jq -r ".[\"$reviewer\"]")
             if [ "$SLACK_ID" != "null" ]; then
               SLACK_MENTIONS="$SLACK_MENTIONS<@$SLACK_ID>,"
             fi
+            GITHUB_MENTIONS="$GITHUB_MENTIONS@$reviewer "
           done
           SLACK_MENTIONS=${SLACK_MENTIONS%,}
           echo "reviewers=$SLACK_MENTIONS" >> $GITHUB_OUTPUT
+          echo "github_reviewers=$GITHUB_MENTIONS" >> $GITHUB_OUTPUT
         env:
           GH_TOKEN: ${{ secrets.GIT_HUB_TOKEN }}
-
       - name: Slack Notification
         uses: 8398a7/action-slack@v3
         with:
           status: custom
           custom_payload: |
             {
-              "text": "🔥 \"${{ github.event.pull_request.title }}\"에 대한 pull request가 생성 되었습니다. 🔥\n PR 브랜치는 \"${{ github.event.pull_request.head.ref }}\"에서 \"${{ github.event.pull_request.base.ref }}\" 🚨 입니다.\n ${{ steps.get-reviewers.outputs.reviewers }}의 리뷰를 기다리고 있어요! 달려오실거죠?\n ${{ github.event.pull_request.html_url }}",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "🔥 *<${{ github.event.pull_request.html_url }}|${{ github.event.pull_request.title }}>*에 대한 pull request가 생성 되었습니다. 🔥"
+                  }
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "PR 브랜치는 `${{ github.event.pull_request.head.ref }}`에서 `${{ github.event.pull_request.base.ref }}` 🚨 입니다.\n ${{ steps.get-reviewers.outputs.reviewers }}의 리뷰를 기다리고 있어요! 달려오실거죠?\nGitHub 멘션: ${{ steps.get-reviewers.outputs.github_reviewers }}"
+                  }
+                }
+              ]
             }
         env:
           GITHUB_TOKEN: ${{ secrets.GIT_HUB_TOKEN }}
