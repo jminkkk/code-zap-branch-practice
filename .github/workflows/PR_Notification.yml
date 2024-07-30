@@ -81,17 +81,18 @@ jobs:
         PR_URL="${{ github.event.pull_request.html_url }}"
         REVIEWERS=$(echo "${{ github.event.pull_request.requested_reviewers }}" | jq -r '.[].login')
 
-        SLACK_IDS_MAPPING=$(echo $SLACK_IDS_JSON | jq -r 'to_entries | map({(.key | ascii_downcase): .value}) | add')
+        SLACK_IDS_MAPPING=$(echo "$SLACK_IDS_JSON" | jq -r 'to_entries | map({(.key | ascii_downcase): .value}) | add')
 
         SLACK_IDS=""
         for reviewer in $REVIEWERS; do
           SLACK_ID=$(echo $SLACK_IDS_MAPPING | jq -r --arg reviewer "$reviewer" '.[$reviewer | ascii_downcase]')
           if [ "$SLACK_ID" != "null" ]; then
-            SLACK_IDS+="${SLACK_IDS}, <@${SLACK_ID}>"
+            SLACK_IDS="${SLACK_IDS}, <@${SLACK_ID}>"
           else
             SLACK_IDS="${SLACK_IDS}, @unknown"
           fi
         done
+        echo SLACK_IDS
         SLACK_IDS=${SLACK_IDS:2} # Remove leading comma and space
 
         curl -X POST -H 'Content-type: application/json' --data '{
