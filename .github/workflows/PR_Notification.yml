@@ -25,13 +25,12 @@ jobs:
           SLACK_MENTIONS=${SLACK_MENTIONS%,}
           echo "reviewers=$SLACK_MENTIONS" >> $GITHUB_OUTPUT
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GIT_HUB_TOKEN }}
 
       - name: Slack Notification
         uses: 8398a7/action-slack@v3
         with:
           status: custom
-          fields: repo,message,commit,author,action,eventName,ref,workflow
           custom_payload: |
             {
               "text": "🔥 \"${{ github.event.pull_request.title }}\"에 대한 pull request가 생성 되었습니다. 🔥\nPR 브랜치는 \"${{ github.event.pull_request.head.ref }}\" ➡️ 🚨 \"${{ github.event.pull_request.base.ref }}\" 🚨 입니다.\n🙌 ${{ steps.get-reviewers.outputs.reviewers }}의 리뷰를 기다리고 있어요! 달려오실거죠?",
@@ -49,5 +48,5 @@ jobs:
               }]
             }
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          GITHUB_TOKEN: ${{ secrets.GIT_HUB_TOKEN }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_PR_CREATE_WEBHOOK_URL }}
