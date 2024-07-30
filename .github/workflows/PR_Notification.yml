@@ -22,12 +22,15 @@ jobs:
             reviewer_map["$key"]="$value"
           done
 
+          reviewers=""
           for reviewer in $(gh pr view ${{ github.event.pull_request.number }} --json reviews --jq '.reviews[].author.login'); do
             if [[ -n "${reviewer_map[$reviewer]}" ]]; then
               reviewers+="<@${reviewer_map[$reviewer]}>,"
             fi
           done
-          echo "PR Reviews: $(gh pr view ${{ github.event.pull_request.number }} --json reviews --jq '.reviews')")
+          reviewers=${reviewers%,}
+          echo "::set-output name=reviewers::$reviewers"
+          echo "!!Reviewers: $reviewers"
 
       - name: Slack Notification
         uses: 8398a7/action-slack@v3
