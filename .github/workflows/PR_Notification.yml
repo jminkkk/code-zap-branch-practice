@@ -14,7 +14,7 @@ jobs:
         id: get-reviewers
         run: |
           MAPPING=$(cat .github/slack-users.json)
-          PR_REVIEWERS=$(gh pr view ${{ github.event.pull_request.number }} --json reviewers -q '.reviewers[].login')
+          PR_REVIEWERS=$(gh pr view ${{ github.event.pull_request.number }} --json reviewRequests -q '.reviewRequests[].login')
           SLACK_MENTIONS=""
           for reviewer in $PR_REVIEWERS; do
             SLACK_ID=$(echo $MAPPING | jq -r ".[\"$reviewer\"]")
