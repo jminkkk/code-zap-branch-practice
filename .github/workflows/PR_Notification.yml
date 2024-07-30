@@ -23,7 +23,7 @@ jobs:
             {
               "attachments": [{
                 "title": "🔥 \"${{ github.event.pull_request.title }}\"에 대한 pull request가 생성 되었습니다. 🔥",
-                "text": "PR 브랜치는 \"${{ github.event.pull_request.head.ref }}\" ➡️ 🚨 \"${{ github.event.pull_request.base.ref }}\" 🚨 입니다.\n🙌 @${{ steps.get-reviewers.outputs.reviewers != '' && format('{0}', steps.get-reviewers.outputs.reviewers) || '아직 지정되지 않음' }}의 리뷰를 기다리고 있어요! 달려오실거죠?",
+                "text": "PR 브랜치는 \"${{ github.event.pull_request.head.ref }}\" ➡️ 🚨 \"${{ github.event.pull_request.base.ref }}\" 🚨 입니다.\n🙌 @${{ steps.get-reviewers.outputs.reviewers != '' && steps.get-reviewers.outputs.reviewers || '아직 지정되지 않음' }}의 리뷰를 기다리고 있어요! 달려오실거죠?",
                 "footer": "GitHub Actions",
                 "footer_icon": "https://github.githubassets.com/favicon.ico",
                 "ts": "${{ github.event.pull_request.created_at }}"
