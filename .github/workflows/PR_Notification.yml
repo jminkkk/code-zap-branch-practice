@@ -7,21 +7,26 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      
       - name: Get reviewers
         id: get-reviewers
         run: |
           MAPPING=$(cat .github/slack-users.json)
-          PR_REVIEWERS=$(gh pr view ${{ github.event.pull_request.number }} --json reviewRequests -q '.reviewRequests[].login')
+          PR_NUMBER=${{ github.event.pull_request.number }}
+          PR_REVIEWERS=$(gh pr view $PR_NUMBER --json reviewRequests -q '.reviewRequests[].login')
           SLACK_MENTIONS=""
+
           for reviewer in $PR_REVIEWERS; do
-            SLACK_ID=$(echo $MAPPING | jq -r ".[\"$reviewer\"]")
+            SLACK_ID=$(echo "$MAPPING" | jq -r ".\"$reviewer\"")
             if [ "$SLACK_ID" != "null" ]; then
               SLACK_MENTIONS="$SLACK_MENTIONS<@$SLACK_ID> "
             fi
           done
+
           echo "reviewers=$SLACK_MENTIONS" >> $GITHUB_OUTPUT
         env:
           GH_TOKEN: ${{ secrets.GIT_HUB_TOKEN }}
+
       - name: Slack Notification
         uses: 8398a7/action-slack@v3
         with:
@@ -33,14 +38,14 @@ jobs:
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": "🔥 *${{ github.event.pull_request.title }}에 대한 <${{ github.event.pull_request.html_url }}| pull request>가 생성 되었습니다.* 🔥"
+                    "text": "🔥 *${{ github.event.pull_request.title }}에 대한 <${{ github.event.pull_request.html_url }}| pull request>가 생성되었습니다.* 🔥"
                   }
                 },
                 {
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": "${{ steps.get-reviewers.outputs.github_reviewers }}의 리뷰를 기다리고 있어요!"
+                    "text": "${{ steps.get-reviewers.outputs.reviewers }}의 리뷰를 기다리고 있어요!"
                   }
                 }
               ]
