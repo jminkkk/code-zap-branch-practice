@@ -33,19 +33,7 @@ jobs:
           status: custom
           custom_payload: |
             {
-              "text": "🔥 \"${{ github.event.pull_request.title }}\"에 대한 pull request가 생성 되었습니다. 🔥\nPR 브랜치는 \"${{ github.event.pull_request.head.ref }}\" ➡️ 🚨 \"${{ github.event.pull_request.base.ref }}\" 🚨 입니다.\n🙌 ${{ steps.get-reviewers.outputs.reviewers }}의 리뷰를 기다리고 있어요! 달려오실거죠?",
-              "attachments": [{
-                "color": "good",
-                "author_name": "${{ github.event.pull_request.user.login }}",
-                "author_icon": "${{ github.event.pull_request.user.avatar_url }}",
-                "fields": [
-                  {
-                    "title": "PR URL",
-                    "value": "${{ github.event.pull_request.html_url }}",
-                    "short": false
-                  }
-                ]
-              }]
+              "text": "🔥 \"${{ github.event.pull_request.title }}\"에 대한 pull request가 생성 되었습니다. 🔥\n PR 브랜치는 \"${{ github.event.pull_request.head.ref }}\" ➡️ 🚨 \"${{ github.event.pull_request.base.ref }}\" 입니다.\n ${{ steps.get-reviewers.outputs.reviewers }}의 리뷰를 기다리고 있어요! 달려오실거죠?\n ${{ github.event.pull_request.html_url }}",
             }
         env:
           GITHUB_TOKEN: ${{ secrets.GIT_HUB_TOKEN }}
