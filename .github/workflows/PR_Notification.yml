@@ -2,12 +2,13 @@ name: PR Slack Notification
 on:
   pull_request:
     types: [opened]
+
 jobs:
   slack-notification:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      
+
       - name: Get reviewers
         id: get-reviewers
         run: |
@@ -17,13 +18,14 @@ jobs:
           SLACK_MENTIONS=""
 
           for reviewer in $PR_REVIEWERS; do
-            SLACK_ID=$(echo "$MAPPING" | jq -r ".\"$reviewer\"")
+            SLACK_ID=$(echo "$MAPPING" | jq -r ".[\"$reviewer\"]")
             if [ "$SLACK_ID" != "null" ]; then
-              SLACK_MENTIONS="$SLACK_MENTIONS<@$SLACK_ID> "
+              SLACK_MENTIONS="<@${SLACK_ID}> "
+              echo @${SLACK_ID}
             fi
           done
 
-          echo "reviewers=$SLACK_MENTIONS" >> $GITHUB_OUTPUT
+          echo "reviewers=${SLACK_MENTIONS}" >> $GITHUB_OUTPUT
         env:
           GH_TOKEN: ${{ secrets.GIT_HUB_TOKEN }}
 
