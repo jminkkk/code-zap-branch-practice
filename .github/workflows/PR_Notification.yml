@@ -1,63 +1,3 @@
-# name: PR Slack Notification
-# on:
-#   pull_request:
-#     types: [opened]
-
-# jobs:
-#   slack-notification:
-#     runs-on: ubuntu-latest
-#     steps:
-#       - uses: actions/checkout@v2
-
-#       - name: Get reviewers
-#         id: get-reviewers
-#         env:
-#           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
-#         run: |
-#           declare -A reviewer_map
-#           IFS=$'\n'
-#           for entry in $(echo '${{ secrets.SLACK_IDS }}' | jq -r 'to_entries | map("\(.key)=\(.value)") | .[]'); do
-#             key=${entry%%=*}
-#             value=${entry#*=}
-#             reviewer_map["$key"]="$value"
-#           done
-
-#           reviewers=""
-#           for reviewer in $(gh pr view ${{ github.event.pull_request.number }} --json reviews --jq '.reviews[].author.login'); do
-#             if [[ -n "${reviewer_map[$reviewer]}" ]]; then
-#               reviewers+="<@${reviewer_map[$reviewer]}>,"
-#             fi
-#           done
-#           reviewers=${reviewers%,}
-#           echo "::set-output name=reviewers::$reviewers"
-#           echo "!!Reviewers: $reviewers"
-
-#       - name: Slack Notification
-#         uses: 8398a7/action-slack@v3
-#         with:
-#           status: custom
-#           custom_payload: |
-#             {
-#               "blocks": [
-#                 {
-#                   "type": "section",
-#                   "text": {
-#                     "type": "mrkdwn",
-#                     "text": "🔥 *${{ github.event.pull_request.title }}에 대한 <${{ github.event.pull_request.html_url }}| pull request>가 생성되었습니다.* 🔥"
-#                   }
-#                 },
-#                 {
-#                   "type": "section",
-#                   "text": {
-#                     "type": "mrkdwn",
-#                     "text": "${{ steps.get-reviewers.outputs.reviewers }}의 리뷰를 기다리고 있어요!"
-#                   }
-#                 }
-#               ]
-#             }
-#         env:
-#           GITHUB_TOKEN: ${{ secrets.GIT_HUB_TOKEN }}
-#           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_PR_CREATE_WEBHOOK_URL }}
 name: PR Notification to Slack
 
 on:
@@ -80,6 +20,7 @@ jobs:
         PR_TITLE="${{ github.event.pull_request.title }}"
         PR_URL="${{ github.event.pull_request.html_url }}"
         REVIEWERS=$(echo "${{ github.event.pull_request.requested_reviewers }}" | jq -r '.[].login')
+        echo REVIEWERS
 
         SLACK_IDS_MAPPING=$(echo "$SLACK_IDS_JSON" | jq -r 'to_entries | map({(.key | ascii_downcase): .value}) | add')
 
@@ -88,6 +29,7 @@ jobs:
           SLACK_ID=$(echo $SLACK_IDS_MAPPING | jq -r --arg reviewer "$reviewer" '.[$reviewer | ascii_downcase]')
           if [ "$SLACK_ID" != "null" ]; then
             SLACK_IDS="${SLACK_IDS}, <@${SLACK_ID}>"
+            echo SLACK_IDS
           else
             SLACK_IDS="${SLACK_IDS}, @unknown"
           fi
