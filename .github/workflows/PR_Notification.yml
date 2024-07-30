@@ -12,7 +12,7 @@ jobs:
           reviewers=$(gh pr view ${{ github.event.pull_request.number }} --json reviewers -q '.reviewers[].login' | tr '\n' ',' | sed 's/,$//')
           echo "reviewers=$reviewers" >> $GITHUB_OUTPUT
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GIT_HUB_TOKEN }}
       - name: Slack Notification
         uses: 8398a7/action-slack@v3
         with:
@@ -28,5 +28,5 @@ jobs:
               }]
             }
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GIT_HUB_TOKEN }}
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_PR_CREATE_WEBHOOK_URL }}
