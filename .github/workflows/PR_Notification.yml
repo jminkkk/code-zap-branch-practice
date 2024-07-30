@@ -37,7 +37,7 @@ jobs:
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": "🔥 ${{ github.event.pull_request.html_url }}에 대한 <pull request|${{ github.event.pull_request.title }}>가 생성 되었습니다. 🔥"
+                    "text": "🔥 ${{ github.event.pull_request.title}}에 대한 <${{ github.event.pull_request.html_url  }}|pull request>가 생성 되었습니다. 🔥"
                   }
                 },
                 {
