@@ -1,0 +1,25 @@
+name: PR Review Notifications
+
+on:
+  pull_request_review:
+    types: [submitted]
+
+jobs:
+  notify_slack:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Slack Notification
+        uses: 8398a7/action-slack@v3
+        with:
+          status: custom
+          custom_payload: |
+            {
+              "attachments": [{
+                "title": "📬 PR #${{ github.event.pull_request.name }}에 새로운 리뷰가 등록되었습니다 📬",
+                "title_link": "${{ github.event.pull_request.html_url }}",
+                "text": "*리뷰어:* ${{ github.event.review.user.login }}\n*상태:* ${{ github.event.review.state }}",
+              }]
+            }
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
