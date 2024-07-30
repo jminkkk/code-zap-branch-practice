@@ -1,5 +1,4 @@
 name: PR Notification to Slack
-
 on:
   pull_request:
     types: [opened]
@@ -20,23 +19,17 @@ jobs:
         PR_TITLE="${{ github.event.pull_request.title }}"
         PR_URL="${{ github.event.pull_request.html_url }}"
         REVIEWERS=$(echo "${{ github.event.pull_request.requested_reviewers }}" | jq -r '.[].login')
-        echo REVIEWERS
 
-        SLACK_IDS_MAPPING=$(echo "$SLACK_IDS_JSON" | jq -r 'to_entries | map({(.key | ascii_downcase): .value}) | add')
-
-        SLACK_IDS=""
-        for reviewer in $REVIEWERS; do
-          SLACK_ID=$(echo $SLACK_IDS_MAPPING | jq -r --arg reviewer "$reviewer" '.[$reviewer | ascii_downcase]')
-          if [ "$SLACK_ID" != "null" ]; then
-            SLACK_IDS="${SLACK_IDS}, <@${SLACK_ID}>"
-            echo SLACK_IDS
-          else
-            SLACK_IDS="${SLACK_IDS}, @unknown"
+        SLACK_IDS_MAPPING=$(echo "$SLACK_IDS_JSON" | jq -r 'to_entries | map({(.key): .value}) | add')
+        
+        reviewers_string=""
+        for reviewer in $(echo "$REVIEWERS" | jq -r '.[]'); do
+          SLACK_ID=$(echo "$SLACK_IDS_MAPPING" | jq -r --arg key "$reviewer" '.[$key]')
+          if [[ -n "$SLACK_ID" ]]; then
+            reviewers_string+="<@$SLACK_ID> "
           fi
         done
-        echo SLACK_IDS
-        SLACK_IDS=${SLACK_IDS:2} # Remove leading comma and space
-
+        
         curl -X POST -H 'Content-type: application/json' --data '{
-          "text": "🔥 '"${PR_TITLE}"'( <'"${PR_URL}"'> ) 에 대한 pull request가 생성되었습니다.\n'"${SLACK_IDS}"'의 리뷰를 기다리고 있어요!"
+          "text": "🔥 '"${PR_TITLE}"'( <'"${PR_URL}"'> ) 에 대한 pull request가 생성되었습니다.\n'"${reviewers_string}"'의 리뷰를 기다리고 있어요!"
         }' $SLACK_WEBHOOK_URL
