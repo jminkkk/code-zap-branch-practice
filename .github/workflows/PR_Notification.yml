@@ -13,17 +13,13 @@ jobs:
           MAPPING=$(cat .github/slack-users.json)
           PR_REVIEWERS=$(gh pr view ${{ github.event.pull_request.number }} --json reviewRequests -q '.reviewRequests[].login')
           SLACK_MENTIONS=""
-          GITHUB_MENTIONS=""
           for reviewer in $PR_REVIEWERS; do
             SLACK_ID=$(echo $MAPPING | jq -r ".[\"$reviewer\"]")
             if [ "$SLACK_ID" != "null" ]; then
-              SLACK_MENTIONS="$SLACK_MENTIONS<@$SLACK_ID>,"
+              SLACK_MENTIONS="$SLACK_MENTIONS<@$SLACK_ID> "
             fi
-            GITHUB_MENTIONS="$GITHUB_MENTIONS@$reviewer "
           done
-          SLACK_MENTIONS=${SLACK_MENTIONS%,}
           echo "reviewers=$SLACK_MENTIONS" >> $GITHUB_OUTPUT
-          echo "github_reviewers=$GITHUB_MENTIONS" >> $GITHUB_OUTPUT
         env:
           GH_TOKEN: ${{ secrets.GIT_HUB_TOKEN }}
       - name: Slack Notification
@@ -37,7 +33,7 @@ jobs:
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": "🔥 ${{ github.event.pull_request.title }}에 대한 <${{ github.event.pull_request.html_url }}| pull request>가 생성 되었습니다. 🔥"
+                    "text": "🔥 **${{ github.event.pull_request.title }}에 대한 <${{ github.event.pull_request.html_url }}| pull request>가 생성 되었습니다. **🔥"
                   }
                 },
                 {
