@@ -15,22 +15,34 @@ jobs:
     - name: Send notification to Slack
       env:
         SLACK_WEBHOOK_URL: ${{ secrets.SLACK_PR_CREATE_WEBHOOK_URL }}
-        SLACK_IDS_JSON: ${{ secrets.SLACK_IDS }}
+        SLACK_IDS: ${{ secrets.SLACK_IDS }} # 문자열 목록 시크릿
       run: |
+        # PR 제목과 URL 가져오기
         PR_TITLE="${{ github.event.pull_request.title }}"
         PR_URL="${{ github.event.pull_request.html_url }}"
-        REVIEWERS=$(echo "${{ github.event.pull_request.requested_reviewers }}" | jq -r '.[].login')
-        SLACK_IDS_MAPPING=$(echo $SLACK_IDS_JSON | jq -r 'to_entries | map({(.key | ascii_downcase): .value}) | add')
+
+        # 리뷰어의 GitHub 로그인 이름 추출
+        REVIEWERS=$(echo '${{ toJson(github.event.pull_request.requested_reviewers) }}' | jq -r '.[].login')
+
+        # 문자열 목록 시크릿에서 매핑을 생성
+        SLACK_IDS_JSON=$(echo $SLACK_IDS | tr ',' '\n' | awk -F= '{print "\"" $1 "\": \"" $2 "\""}' | jq -s 'add')
+
+        # Slack ID 문자열 초기화
         SLACK_IDS=""
         for reviewer in $REVIEWERS; do
-          SLACK_ID=$(echo $SLACK_IDS_MAPPING | jq -r --arg reviewer "$reviewer" '.[$reviewer | ascii_downcase]')
+          # 대소문자를 구분하여 리뷰어 로그인 이름으로 Slack ID 찾기
+          SLACK_ID=$(echo "$SLACK_IDS_JSON" | jq -r --arg reviewer "$reviewer" '.[$reviewer]')
+          
           if [ "$SLACK_ID" != "null" ]; then
-            SLACK_IDS+="${SLACK_IDS}, <@${SLACK_ID}>"
+            SLACK_IDS="${SLACK_IDS}, <@${SLACK_ID}>"
           else
             SLACK_IDS="${SLACK_IDS}, @unknown"
           fi
         done
-        SLACK_IDS=${SLACK_IDS:2} # Remove leading comma and space
+        
+        # 앞의 쉼표와 공백 제거
+        SLACK_IDS=${SLACK_IDS:2}
+
         curl -X POST -H 'Content-type: application/json' --data '{
           "text": "🔥 '"${PR_TITLE}"'( <'"${PR_URL}"'> ) 에 대한 pull request가 생성되었습니다.\n'"${SLACK_IDS}"'의 리뷰를 기다리고 있어요!"
         }' $SLACK_WEBHOOK_URL
