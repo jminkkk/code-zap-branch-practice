@@ -2,8 +2,15 @@ name: PR Notification to Slack
 
 on:
   pull_request:
-    types: [opened, reopened]
+    types: [ opened, reopened ]
 
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+      
     - name: Send notification to Slack
       env:
         SLACK_WEBHOOK_URL: ${{ secrets.SLACK_PR_CREATE_WEBHOOK_URL }}
