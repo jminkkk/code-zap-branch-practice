@@ -17,7 +17,7 @@ jobs:
           SLACK_IDS: ${{ secrets.SLACK_IDS }}
         run: |
           WORKFLOW_NAME="${{ github.event.workflow_run.name }}"
-          TRIGGER_TYPE="${{ github.event.workflow_run.event }}"
+          WORKFLOW_URL="${{ github.event.workflow_run.html_url }}"
           ASSIGNEE="${{ github.event.workflow_run.actor.login }}"
           mentions=""
 
@@ -34,7 +34,7 @@ jobs:
           fi
 
           if [ ! -z "$MENTION" ]; then
-            message="$MENTION 님, 실행된 $WORKFLOW_NAME 워크플로가 실패했습니다. 확인해주세요."
+            message="$MENTION 님, 실행된 $WORKFLOW_NAME 워크플로가 실패했습니다. <$WORKFLOW_URL|$WORKFLOW_NAME>."
             curl -X POST -H 'Content-type: application/json' \
               --data "{\"text\":\"$message\"}" \
               "$SLACK_WEBHOOK_URL"
