@@ -12,12 +12,13 @@ jobs:
     - name: Slack 알람 보내기
       env:
         SLACK_WEBHOOK_URL: ${{ secrets.SLACK_PR_CREATE_WEBHOOK_URL }}
-        TEAM_MAPPING: ${{ secrets.SLACK_IDS }}
+        SLACK_IDS: ${{ secrets.SLACK_IDS }}
       run: |
-        echo "PR_TITLE=${{ github.event.pull_request.title }}" >> $GITHUB_ENV
-        echo "PR_URL=${{ github.event.pull_request.html_url }}" >> $GITHUB_ENV
-        echo "REVIEWERS=$(echo '${{ toJson(github.event.pull_request.requested_reviewers.*.login) }}')" >> $GITHUB_ENV
-                        
+        PR_TITLE="${{ github.event.pull_request.title }}"
+        PR_URL="${{ github.event.pull_request.html_url }}"
+        REVIEWERS='${{ toJson(github.event.pull_request.requested_reviewers.*.login) }}'
+        echo "REVIEWERS: $REVIEWERS"
+        
         parse_slack_ids() {
             echo "$SLACK_IDS" | jq -r 'to_entries | map("\(.key):\(.value)") | .[]'
         }
@@ -38,7 +39,7 @@ jobs:
         echo "Mentions: $mentions"
         
         if [ ! -z "$mentions" ]; then
-          message="$mentions 님, 새로운 PR이 생성되었습니다: <$pr_url|$pr_title>"
+          message="$mentions 님, 새로운 PR이 생성되었습니다: <$PR_URL|$PR_TITLE>"
           curl -X POST -H 'Content-type: application/json' \
             --data "{\"text\":\"$message\"}" \
             "$SLACK_WEBHOOK_URL"
