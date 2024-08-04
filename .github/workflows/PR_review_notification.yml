@@ -1,68 +1,62 @@
 name: PR Review Notification
-
 on:
   pull_request_review:
     types: [submitted]
 
 jobs:
-  notify-assignee:
+  notify_pr_author:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+    - name: Checkout code
+      uses: actions/checkout@v2
 
-      - name: Get assignees and map to Slack IDs
-        id: get-assignees
-        run: |
-          MAPPING=$(cat .github/slack-users.json)
-          PR_ASSIGNEES=$(gh pr view ${{ github.event.pull_request.number }} --json assignees -q '.assignees[].login')
-          SLACK_MENTIONS=""
-          for assignee in $PR_ASSIGNEES; do
-            SLACK_ID=$(echo $MAPPING | jq -r ".[\"$assignee\"]")
-            if [ "$SLACK_ID" != "null" ]; then
-              SLACK_MENTIONS="$SLACK_MENTIONS<@$SLACK_ID>,"
-            fi
-          done
-          SLACK_MENTIONS=${SLACK_MENTIONS%,}
-          echo "assignees=$SLACK_MENTIONS" >> $GITHUB_OUTPUT
-        env:
-          GH_TOKEN: ${{ secrets.GIT_HUB_TOKEN }}
+    - name: Send Slack notification
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_PR_REVIEW_WEBHOOK_URL }}
+        SLACK_IDS: ${{ secrets.SLACK_IDS }}
+      run: |
+        PR_TITLE="${{ github.event.pull_request.title }}"
+        PR_URL="${{ github.event.pull_request.html_url }}"
+        PR_AUTHOR="${{ github.event.pull_request.user.login }}"
+        REVIEW_STATE="${{ github.event.review.state }}"
+        REVIEWER="${{ github.event.review.user.login }}"
 
-      - name: Send Slack notification
-        uses: 8398a7/action-slack@v3
-        with:
-          status: custom
-          custom_payload: |
-            {
-              "text": "📬 PR #${{ github.event.pull_request.number }}에 새로운 리뷰가 등록되었습니다 📬\n\n${{ steps.get-assignees.outputs.assignees }}",
-              "attachments": [{
-                "color": "good",
-                "author_name": "${{ github.event.review.user.login }}",
-                "author_icon": "${{ github.event.review.user.avatar_url }}",
-                "fields": [
-                  {
-                    "title": "PR 제목",
-                    "value": "${{ github.event.pull_request.title }}",
-                    "short": false
-                  },
-                  {
-                    "title": "리뷰어",
-                    "value": "${{ github.event.review.user.login }}",
-                    "short": true
-                  },
-                  {
-                    "title": "리뷰 상태",
-                    "value": "${{ github.event.review.state }}",
-                    "short": true
-                  },
-                  {
-                    "title": "PR URL",
-                    "value": "${{ github.event.pull_request.html_url }}",
-                    "short": false
-                  }
-                ]
-              }]
-            }
-        env:
-          GITHUB_TOKEN: ${{ secrets.GIT_HUB_TOKEN }}
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_PR_REVIEW_WEBHOOK_URL }}
+        parse_slack_ids() {
+            echo "$SLACK_IDS" | jq -r 'to_entries | map("\(.key):\(.value)") | .[]'
+        }
+
+        author_slack_id=$(parse_slack_ids | grep "^$PR_AUTHOR:" | cut -d':' -f2)
+        reviewer_slack_id=$(parse_slack_ids | grep "^$REVIEWER:" | cut -d':' -f2)
+
+        if [ -n "$author_slack_id" ]; then
+            author_mention="<@$author_slack_id>"
+        else
+            author_mention="$PR_AUTHOR"
+        fi
+
+        if [ -n "$reviewer_slack_id" ]; then
+            reviewer_mention="<@$reviewer_slack_id>"
+        else
+            reviewer_mention="$REVIEWER"
+        fi
+
+        case "$REVIEW_STATE" in
+          "changes_requested")
+            message="$author_mention님, $reviewer_mention님이 PR에 변경을 요청했습니다: <$PR_URL|$PR_TITLE>"
+            ;;
+          "commented")
+            message="$author_mention님, $reviewer_mention님이 PR에 코멘트를 남겼습니다: <$PR_URL|$PR_TITLE>"
+            ;;
+          "approved")
+            message="$author_mention님, 축하합니다! $reviewer_mention님이 PR을 승인했습니다: <$PR_URL|$PR_TITLE>"
+            ;;
+        esac
+
+        if [ ! -z "$message" ]; then
+          curl -X POST -H 'Content-type: application/json' \
+            --data "{\"text\":\"$message\"}" \
+            "$SLACK_WEBHOOK_URL"
+          echo "Sent message: $message"
+        else
+          echo "No notification sent"
+        fi
