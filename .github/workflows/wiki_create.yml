@@ -1,0 +1,39 @@
+name: Wiki Page Notification
+on:
+  gollum:
+    types: [created]
+
+jobs:
+  notify_wiki_creation:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Send Slack notification
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WIKI_WEBHOOK_URL }}
+        SLACK_IDS: ${{ secrets.SLACK_IDS }}
+      run: |
+        WIKI_TITLE="${{ github.event.wiki.title }}"
+        WIKI_URL="${{ github.event.wiki.html_url }}"
+        WIKI_AUTHOR="${{ github.actor }}"
+
+        parse_slack_ids() {
+            echo "$SLACK_IDS" | jq -r 'to_entries | map("\(.key):\(.value)") | .[]'
+        }
+
+        author_slack_id=$(parse_slack_ids | grep "^$WIKI_AUTHOR:" | cut -d':' -f2)
+
+        if [ -n "$author_slack_id" ]; then
+            author_mention="<@$author_slack_id>"
+        else
+            author_mention="$WIKI_AUTHOR"
+        fi
+
+        message="새로운 위키 페이지가 생성되었습니다: <$WIKI_URL|$WIKI_TITLE> (작성자: $author_mention)"
+
+        curl -X POST -H 'Content-type: application/json' \
+          --data "{\"text\":\"$message\"}" \
+          "$SLACK_WEBHOOK_URL"
+        echo "Sent message: $message"
