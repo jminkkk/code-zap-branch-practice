@@ -25,19 +25,7 @@ jobs:
               echo "$SLACK_IDS" | jq -r 'to_entries | map("\(.key):\(.value)") | .[]'
           }
 
-          echo "TRIGGER_TYPE: $TRIGGER_TYPE"
-          echo "workflow_run: ${{ github.event.workflow_run.actor.login }}"
-
-          if [ "$TRIGGER_TYPE" == "pull_request" ]; then
-            ASSIGNEE="${{ github.event.pull_request.user.login }}"
-            mentions="$ASSIGNEE"
-
-          elif [ "$TRIGGER_TYPE" == "push" ]; then
-            ASSIGNEE="${{ github.event.pusher.name }}"
-            mentions="$ASSIGNEE"
-          fi
-
-          echo "mentions: $mentions"
+          ASSIGNEE="${{ github.event.workflow_run.actor.login }}"
           
           slack_id=$(parse_slack_ids | grep "^$ASSIGNEE:" | cut -d':' -f2)
 
