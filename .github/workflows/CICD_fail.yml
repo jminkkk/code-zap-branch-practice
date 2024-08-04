@@ -18,14 +18,12 @@ jobs:
         run: |
           WORKFLOW_NAME="${{ github.event.workflow_run.name }}"
           TRIGGER_TYPE="${{ github.event.workflow_run.event }}"
-          ASSIGNEE=""
+          ASSIGNEE="${{ github.event.workflow_run.actor.login }}"
           mentions=""
 
           parse_slack_ids() {
               echo "$SLACK_IDS" | jq -r 'to_entries | map("\(.key):\(.value)") | .[]'
           }
-
-          ASSIGNEE="${{ github.event.workflow_run.actor.login }}"
           
           slack_id=$(parse_slack_ids | grep "^$ASSIGNEE:" | cut -d':' -f2)
 
