@@ -2,6 +2,7 @@ name: Wiki Page Notification
 on:
   gollum:
     types: [created]
+    branches: [main]
 
 jobs:
   notify_wiki_creation:
