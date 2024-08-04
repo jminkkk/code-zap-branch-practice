@@ -1,0 +1,44 @@
+name: Notify on Workflow Failure
+
+on:
+  workflow_run:
+    workflows: ["Backend CI", "Backend CD", "Frontend CD", "Frontend CI"] 
+    types:
+      - completed
+
+jobs:
+  notify:
+    if: ${{ github.event.workflow_run.conclusion == 'failure' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Slack notification
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_CICD_FAIL_WEBHOOK_URL }}
+          SLACK_IDS: ${{ secrets.SLACK_IDS }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          WORKFLOW_NAME="${{ github.event.workflow_run.name }}"
+          TRIGGER_TYPE="${{ github.event.workflow_run.event }}"
+          MENTION=""
+
+          if [ "$TRIGGER_TYPE" == "pull_request" ]; then
+            ASSIGNEE="${{ github.event.pull_request.user.login }}"
+            author_slack_id=$(echo "$SLACK_IDS" | jq -r --arg USER "$ASSIGNEE" 'to_entries | map(select(.key == $USER)) | .[].value')
+
+          elif [ "$TRIGGER_TYPE" == "push" ]; then
+            ASSIGNEE="${{ github.event.pusher.name }}"
+            author_slack_id=$(echo "$SLACK_IDS" | jq -r --arg USER "$ASSIGNEE" 'to_entries | map(select(.key == $USER)) | .[].value')
+          fi
+
+          if [ -n "$author_slack_id" ]; then
+              MENTION="<@$author_slack_id>"
+          else
+              MENTION="$ASSIGNEE"
+          fi
+
+          message="$MENTION 님, 실행된 $WORKFLOW_NAME 워크플로가 실패했습니다. 확인해주세요."
+
+          curl -X POST -H 'Content-type: application/json' \
+            --data "{\"text\":\"$message\"}" \
+            "$SLACK_WEBHOOK_URL"
+          echo "Sent message: $message"
