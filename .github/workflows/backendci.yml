@@ -1,0 +1,27 @@
+name: Backend CI
+
+on:
+  pull_request:
+    branches:
+      - '**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      build-directory: ./backend
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Start MySQL
+        uses: mirromutth/mysql-action@v1.1
+        with:
+          mysql database: code_zap
+      - name: Setup JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: 17
+          distribution: temurin
+      - name: Test with Gradle Wrapper
+        run: ./gradlew test
+        working-directory: ${{ env.build-directory }}
