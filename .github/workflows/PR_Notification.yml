@@ -38,7 +38,7 @@ jobs:
         pr_url="${{ steps.pr_details.outputs.html_url }}"
         
         team_mapping=$(echo $TEAM_MAPPING | jq -r '.')
-        echo reviewers
+        echo "Reviewers: $reviewers"
         
         mentions=""
         for reviewer in $reviewers; do
@@ -47,7 +47,7 @@ jobs:
             mentions="$mentions <@$slack_id>"
           fi
         done
-        echo mentions
+        echo "mentions: $mentions"
 
         if [ ! -z "$mentions" ]; then
           message="$mentions 님, 새로운 PR이 생성되었습니다: <$pr_url|$pr_title>"
