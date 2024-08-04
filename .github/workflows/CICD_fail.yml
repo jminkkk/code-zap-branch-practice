@@ -42,9 +42,12 @@ jobs:
               MENTION="$ASSIGNEE"
           fi
 
-          message="$MENTION 님, 실행된 $WORKFLOW_NAME 워크플로가 실패했습니다. 확인해주세요."
-
-          curl -X POST -H 'Content-type: application/json' \
-            --data "{\"text\":\"$message\"}" \
-            "$SLACK_WEBHOOK_URL"
-          echo "Sent message: $message"
+          if [ ! -z "$MENTION" ]; then
+            message="$MENTION 님, 실행된 $WORKFLOW_NAME 워크플로가 실패했습니다. 확인해주세요."
+            curl -X POST -H 'Content-type: application/json' \
+              --data "{\"text\":\"$message\"}" \
+              "$SLACK_WEBHOOK_URL"
+            echo "Sent message: $message"
+          else
+            echo "No MENTIONER to notify"
+          fi
