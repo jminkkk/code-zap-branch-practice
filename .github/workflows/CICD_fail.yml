@@ -2,36 +2,42 @@ name: Notify on Workflow Failure
 
 on:
   workflow_run:
-    workflows: ["Backend CI", "Backend CD", "Frontend CD", "Frontend CI"] 
+    workflows: ["Backend CI", "Backend CD", "Frontend CD", "Frontend CI"]  # 특정 워크플로 이름
     types:
       - completed
 
 jobs:
   notify:
-    if: ${{ github.event.workflow_run.conclusion == 'failure' }}
+    if: ${{ github.event.workflow_run.conclusion == 'failure' }}  # 실패한 경우에만 실행
     runs-on: ubuntu-latest
     steps:
       - name: Send Slack notification
         env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_CICD_FAIL_WEBHOOK_URL }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
           SLACK_IDS: ${{ secrets.SLACK_IDS }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           WORKFLOW_NAME="${{ github.event.workflow_run.name }}"
           TRIGGER_TYPE="${{ github.event.workflow_run.event }}"
-          MENTION=""
+          ASSIGNEE=""
+          mentions=""
+
+          parse_slack_ids() {
+              echo "$SLACK_IDS" | jq -r 'to_entries | map("\(.key):\(.value)") | .[]'
+          }
 
           if [ "$TRIGGER_TYPE" == "pull_request" ]; then
             ASSIGNEE="${{ github.event.pull_request.user.login }}"
-            author_slack_id=$(echo "$SLACK_IDS" | jq -r --arg USER "$ASSIGNEE" 'to_entries | map(select(.key == $USER)) | .[].value')
+            mentions="$ASSIGNEE"
 
           elif [ "$TRIGGER_TYPE" == "push" ]; then
             ASSIGNEE="${{ github.event.pusher.name }}"
-            author_slack_id=$(echo "$SLACK_IDS" | jq -r --arg USER "$ASSIGNEE" 'to_entries | map(select(.key == $USER)) | .[].value')
+            mentions="$ASSIGNEE"
           fi
 
-          if [ -n "$author_slack_id" ]; then
-              MENTION="<@$author_slack_id>"
+          slack_id=$(parse_slack_ids | grep "^$ASSIGNEE:" | cut -d':' -f2)
+
+          if [ -n "$slack_id" ]; then
+              MENTION="<@$slack_id>"
           else
               MENTION="$ASSIGNEE"
           fi
