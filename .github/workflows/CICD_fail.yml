@@ -34,7 +34,7 @@ jobs:
           fi
 
           if [ ! -z "$MENTION" ]; then
-            message="$MENTION 님, 실행된 $WORKFLOW_NAME 워크플로가 실패했습니다. <$WORKFLOW_URL|$WORKFLOW_NAME>."
+            message="$MENTION 님, 실행된 $WORKFLOW_NAME 워크플로가 실패했습니다. <$WORKFLOW_URL|확인하러 가기>."
             curl -X POST -H 'Content-type: application/json' \
               --data "{\"text\":\"$message\"}" \
               "$SLACK_WEBHOOK_URL"
