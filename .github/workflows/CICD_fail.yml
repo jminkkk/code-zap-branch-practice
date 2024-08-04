@@ -2,13 +2,13 @@ name: Notify on Workflow Failure
 
 on:
   workflow_run:
-    workflows: ["Backend CI", "Backend CD", "Frontend CD", "Frontend CI"]  # 특정 워크플로 이름
+    workflows: ["Backend CI", "Backend CD", "Frontend CD", "Frontend CI"]
     types:
       - completed
 
 jobs:
   notify:
-    if: ${{ github.event.workflow_run.conclusion == 'failure' }}  # 실패한 경우에만 실행
+    if: ${{ github.event.workflow_run.conclusion == 'failure' }}
     runs-on: ubuntu-latest
     steps:
       - name: Send Slack notification
@@ -25,6 +25,7 @@ jobs:
               echo "$SLACK_IDS" | jq -r 'to_entries | map("\(.key):\(.value)") | .[]'
           }
 
+          echo "TRIGGER_TYPE: $TRIGGER_TYPE"
           if [ "$TRIGGER_TYPE" == "pull_request" ]; then
             ASSIGNEE="${{ github.event.pull_request.user.login }}"
             mentions="$ASSIGNEE"
@@ -34,6 +35,8 @@ jobs:
             mentions="$ASSIGNEE"
           fi
 
+          echo "mentions: $mentions"
+          
           slack_id=$(parse_slack_ids | grep "^$ASSIGNEE:" | cut -d':' -f2)
 
           if [ -n "$slack_id" ]; then
