@@ -26,7 +26,7 @@ jobs:
           }
 
           echo "TRIGGER_TYPE: $TRIGGER_TYPE"
-          echo "workflow_run: $workflow_run"
+          echo "workflow_run: ${{ github.event.workflow_run }}"
 
           if [ "$TRIGGER_TYPE" == "pull_request" ]; then
             ASSIGNEE="${{ github.event.pull_request.user.login }}"
