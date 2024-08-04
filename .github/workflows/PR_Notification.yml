@@ -1,42 +1,48 @@
 name: PR Slack Notification
-
 on:
   pull_request:
     types: [opened, reopened]
-
 jobs:
   notify_reviewers:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
-
+        
     - name: Slack 알람 보내기
       env:
         SLACK_WEBHOOK_URL: ${{ secrets.SLACK_PR_CREATE_WEBHOOK_URL }}
         TEAM_MAPPING: ${{ secrets.SLACK_IDS }}
-        github-token: ${{secrets.GITHUB_TOKEN}}
       run: |
-        pr_title="${{ github.event.pull_request.title }}"
-        pr_url="${{ github.event.pull_request.html_url }}"
-        reviewers=$(echo "${{ github.event.pull_request.requested_reviewers }}" | jq -r '.[].login')
+        echo "PR_TITLE=${{ github.event.pull_request.title }}" >> $GITHUB_ENV
+        echo "PR_URL=${{ github.event.pull_request.html_url }}" >> $GITHUB_ENV
+        echo "REVIEWERS=$(echo '${{ toJson(github.event.pull_request.requested_reviewers.*.login) }}')" >> $GITHUB_ENV
+                        
+        parse_slack_ids() {
+            echo "$SLACK_IDS" | jq -r 'to_entries | map("\(.key):\(.value)") | .[]'
+        }
         
-        team_mapping=$(echo $TEAM_MAPPING | jq -r '.')
-        echo "Reviewers: $reviewers"
-        
+        reviewers=$(echo "$REVIEWERS" | jq -r '.[]')
         mentions=""
+        
         for reviewer in $reviewers; do
-          slack_id=$(echo $team_mapping | jq -r --arg gh "$reviewer" '.[$gh]')
-          echo "!reviewer: $reviewer"
-          if [ "$slack_id" != "null" ]; then
-            mentions="$mentions <@$slack_id>"
-          fi
+            slack_id=$(parse_slack_ids | grep "^$reviewer:" | cut -d':' -f2)
+            
+            if [ -n "$slack_id" ]; then
+                mentions="$mentions <@$slack_id>"
+            else
+                mentions="$mentions $reviewer"
+            fi
         done
-        echo "mentions: $mentions"
-
+        
+        echo "Mentions: $mentions"
+        
         if [ ! -z "$mentions" ]; then
           message="$mentions 님, 새로운 PR이 생성되었습니다: <$pr_url|$pr_title>"
-          curl -X POST -H 'Content-type: application/json' --data '{"text":"$mentions"}' \
-          ${{ secrets.SLACK_PR_CREATE_WEBHOOK_URL }}
-        echo "message: $message"
+          curl -X POST -H 'Content-type: application/json' \
+            --data "{\"text\":\"$message\"}" \
+            "$SLACK_WEBHOOK_URL"
+          echo "Sent message: $message"
+        else
+          echo "No reviewers to notify"
         fi
