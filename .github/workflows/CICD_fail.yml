@@ -13,7 +13,7 @@ jobs:
     steps:
       - name: Send Slack notification
         env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_CICD_FAIL_WEBHOOK_URL }}
           SLACK_IDS: ${{ secrets.SLACK_IDS }}
         run: |
           WORKFLOW_NAME="${{ github.event.workflow_run.name }}"
