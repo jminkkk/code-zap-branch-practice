@@ -15,8 +15,9 @@ jobs:
         SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WIKI_WEBHOOK_URL }}
         SLACK_IDS: ${{ secrets.SLACK_IDS }}
       run: |
-        WIKI_TITLE="${{ github.event.wiki.title }}"
-        WIKI_URL="${{ github.event.wiki.html_url }}"
+        WIKI_TITLE="${{ github.event.pages[0].title }}"
+        WIKI_URL="https://github.com/${{ github.repository }}/wiki/${{ github.event.pages[0].title }}"
+
         WIKI_AUTHOR="${{ github.actor }}"
 
         parse_slack_ids() {
