@@ -1,68 +1,58 @@
-name: PR Review Notification
+name: PR Slack Notification
 on:
-  pull_request_review:
-    types: [submitted]
-
+  pull_request:
+    types: [opened, reopened, labeled]
 jobs:
-  notify_pr_author:
+  notify_reviewers:
     runs-on: ubuntu-latest
     steps:
     - name: 변수 추출
       run: |
-        SLACK_WEBHOOK_URL=${{ secrets.SLACK_PR_REVIEW_WEBHOOK_URL }}
+        SLACK_WEBHOOK_URL=${{ secrets.SLACK_PR_CREATE_WEBHOOK_URL }}
         SLACK_IDS=${{ secrets.SLACK_IDS }}
         echo "SLACK_WEBHOOK_URL=$SLACK_WEBHOOK_URL" >> $GITHUB_ENV
         echo "SLACK_IDS=$SLACK_IDS" >> $GITHUB_ENV
-
-    - name: PR에 리뷰 등록 시 담당자에게 Slack 알람
+        
+    - name: PR 생성 시 reviewer들에게 Slack 알람 보내기
       run: |
         PR_TITLE="${{ github.event.pull_request.title }}"
         PR_URL="${{ github.event.pull_request.html_url }}"
-        PR_AUTHOR="${{ github.event.pull_request.user.login }}"
-        REVIEW_STATE="${{ github.event.review.state }}"
-        REVIEWER="${{ github.event.review.user.login }}"
-
+        REVIEWERS='${{ toJson(github.event.pull_request.requested_reviewers.*.login) }}'
+        LABELS='${{ toJson(github.event.pull_request.labels.*.name) }}'
+        echo "REVIEWERS: $REVIEWERS"
+        echo "LABELS: $LABELS"
+        
         parse_slack_ids() {
             echo "$SLACK_IDS" | jq -r 'to_entries | map("\(.key):\(.value)") | .[]'
         }
-
-        author_slack_id=$(parse_slack_ids | grep "^$PR_AUTHOR:" | cut -d':' -f2)
-        reviewer_slack_id=$(parse_slack_ids | grep "^$REVIEWER:" | cut -d':' -f2)
         
-        echo "PR_AUTHOR: $PR_AUTHOR"
-        echo "REVIEWER: $REVIEWER"
-        echo "author_slack_id: $author_slack_id"
-        echo "reviewer_slack_id: $reviewer_slack_id"
-
-        if [ -n "$author_slack_id" ]; then
-            author_mention="<@$author_slack_id>"
-        else
-            author_mention="$PR_AUTHOR"
-        fi
-
-        if [ -n "$reviewer_slack_id" ]; then
-            reviewer_mention="<@$reviewer_slack_id>"
-        else
-            reviewer_mention="$REVIEWER"
-        fi
-
-        case "$REVIEW_STATE" in
-          "changes_requested")
-            message="$author_mention님, $reviewer_mention님이 PR에 변경을 요청했습니다: <$PR_URL|$PR_TITLE>"
-            ;;
-          "commented")
-            message="$author_mention님, $reviewer_mention님이 PR에 코멘트를 남겼습니다: <$PR_URL|$PR_TITLE>"
-            ;;
-          "approved")
-            message="$author_mention님, 축하합니다! $reviewer_mention님이 PR을 승인했습니다: <$PR_URL|$PR_TITLE>"
-            ;;
-        esac
-
-        if [ ! -z "$message" ]; then
+        reviewers=$(echo "$REVIEWERS" | jq -r '.[]')
+        mentions=""
+        
+        for reviewer in $reviewers; do
+            slack_id=$(parse_slack_ids | grep "^$reviewer:" | cut -d':' -f2)
+            
+            if [ -n "$slack_id" ]; then
+                mentions="$mentions <@$slack_id>"
+            else
+                mentions="$mentions $reviewer"
+            fi
+        done
+        
+        echo "Mentions: $mentions"
+        
+        if [ ! -z "$mentions" ]; then
+          message="$mentions 님, 새로운 PR이 생성되었습니다: <$PR_URL|$PR_TITLE>"
+          
+          # 특정 라벨 확인 및 메시지 수정
+          if echo "$LABELS" | jq -e 'contains(["urgent"])' > /dev/null; then
+            message="$message\n:rotating_light: 긴급 PR입니다. 빠른 리뷰 부탁드립니다!"
+          fi
+          
           curl -X POST -H 'Content-type: application/json' \
             --data "{\"text\":\"$message\"}" \
             "$SLACK_WEBHOOK_URL"
           echo "Sent message: $message"
         else
-          echo "No notification sent"
+          echo "No reviewers to notify"
         fi
