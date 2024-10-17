@@ -45,7 +45,7 @@ jobs:
           message="$mentions 님, 새로운 PR이 생성되었습니다: <$PR_URL|$PR_TITLE>"
           
           # 특정 라벨 확인 및 메시지 수정
-          if echo "$LABELS" | jq -e 'contains(["urgent"])' > /dev/null; then
+          if echo "$LABELS" | jq -e 'contains(["bug"])' > /dev/null; then
             message="$message\n:rotating_light: 긴급 PR입니다. 빠른 리뷰 부탁드립니다!"
           fi
           
