@@ -2,6 +2,7 @@ name: PR Slack Notification
 on:
   pull_request:
     types: [review_requested]
+
 jobs:
   notify_reviewers:
     runs-on: ubuntu-latest
@@ -13,46 +14,31 @@ jobs:
         echo "SLACK_WEBHOOK_URL=$SLACK_WEBHOOK_URL" >> $GITHUB_ENV
         echo "SLACK_IDS=$SLACK_IDS" >> $GITHUB_ENV
         
-    - name: PR 생성 시 reviewer들에게 Slack 알람 보내기
+    - name: PR 생성 시 reviewer에게 Slack 알람 보내기
       run: |
         PR_TITLE="${{ github.event.pull_request.title }}"
         PR_URL="${{ github.event.pull_request.html_url }}"
-        REVIEWERS='${{ toJson(github.event.pull_request.requested_reviewers.*.login) }}'
-        LABELS='${{ toJson(github.event.pull_request.labels.*.name) }}'
-        echo "REVIEWERS: $REVIEWERS"
-        echo "LABELS: $LABELS"
+        REQUESTED_REVIEWER='${{ github.event.pull_request.requested_reviewer.login }}'
+        echo "REQUESTED_REVIEWER: $REQUESTED_REVIEWER"
         
         parse_slack_ids() {
             echo "$SLACK_IDS" | jq -r 'to_entries | map("\(.key):\(.value)") | .[]'
         }
         
-        reviewers=$(echo "$REVIEWERS" | jq -r '.[]')
-        mentions=""
+        slack_id=$(parse_slack_ids | grep "^$REQUESTED_REVIEWER:" | cut -d':' -f2)
         
-        for reviewer in $reviewers; do
-            slack_id=$(parse_slack_ids | grep "^$reviewer:" | cut -d':' -f2)
-            
-            if [ -n "$slack_id" ]; then
-                mentions="$mentions <@$slack_id>"
-            else
-                mentions="$mentions $reviewer"
-            fi
-        done
+        if [ -n "$slack_id" ]; then
+            mention="<@$slack_id>"
+        else
+            mention="$REQUESTED_REVIEWER"
+        fi
         
-        echo "Mentions: $mentions"
+        echo "Mention: $mention"
         
-        if [ ! -z "$mentions" ]; then
-          message="$mentions 님, 새로운 PR이 생성되었습니다: <$PR_URL|$PR_TITLE>"
-          
-          # 특정 라벨 확인 및 메시지 수정
-          if echo "$LABELS" | jq -e 'contains(["bug"])' > /dev/null; then
-            message="$message\n:rotating_light: 긴급 PR입니다. 빠른 리뷰 부탁드립니다!"
-          fi
-          
+        if [ ! -z "$mention" ]; then
+          message="$mention 님, 새로운 PR이 생성되었습니다: <$PR_URL|$PR_TITLE>"
           curl -X POST -H 'Content-type: application/json' \
             --data "{\"text\":\"$message\"}" \
             "$SLACK_WEBHOOK_URL"
           echo "Sent message: $message"
-        else
-          echo "No reviewers to notify"
         fi
